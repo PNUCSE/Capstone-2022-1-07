@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PNUrecovery</string>
+    <string name="image_load">LOAD</string>
+    <string name="image_edit">EDIT</string>
+    <string name="image_turn">TURN</string>
+    <string name="image_share">SHARE</string>
+    <string name="image_save">SAVE</string>
+    <string name="image_super_resolution">S·R</string>
+</resources>
