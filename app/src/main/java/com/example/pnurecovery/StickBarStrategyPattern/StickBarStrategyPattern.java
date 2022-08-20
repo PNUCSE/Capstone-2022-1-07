@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -39,6 +43,21 @@ public abstract class StickBarStrategyPattern extends Activity implements SeekBa
         bmp = img.getDrawingCache();
     }
 
+    public Bitmap changeBitmap(Bitmap bmp, float value)
+    {
+        ColorMatrix cm = createColorMatrix(value);
+
+        Bitmap change_Bitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
+
+        Canvas canvas = new Canvas(change_Bitmap);
+
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(cm));
+        canvas.drawBitmap(bmp, 0, 0, paint);
+
+        return change_Bitmap;
+    }
+
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         messageSetting(i);
@@ -51,6 +70,8 @@ public abstract class StickBarStrategyPattern extends Activity implements SeekBa
     public void onStopTrackingTouch(SeekBar seekBar) {
 
     }
+
+    public abstract ColorMatrix createColorMatrix(float value);
     public abstract void buttonOperating(int i);
     public abstract void messageSetting(int i);
 }

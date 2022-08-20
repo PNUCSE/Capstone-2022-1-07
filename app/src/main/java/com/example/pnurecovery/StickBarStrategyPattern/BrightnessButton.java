@@ -15,8 +15,8 @@ public class BrightnessButton extends StickBarStrategyPattern {
         super(activity);
     }
 
-    public Bitmap changeBitmapBrightness(Bitmap bmp, float brightness)
-    {
+    @Override
+    public ColorMatrix createColorMatrix(float brightness) {
         ColorMatrix cm = new ColorMatrix(new float[]
                 {
                         1, 0, 0, 0, brightness,
@@ -25,21 +25,13 @@ public class BrightnessButton extends StickBarStrategyPattern {
                         0, 0, 0, 1, 0
                 });
 
-        Bitmap change_Bitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
-
-        Canvas canvas = new Canvas(change_Bitmap);
-
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-        canvas.drawBitmap(bmp, 0, 0, paint);
-
-        return change_Bitmap;
+        return cm;
     }
 
     @Override
     public void buttonOperating(int i) {
         brightness = -127 + 127 * (i/50.0);
-        img.setImageBitmap(changeBitmapBrightness(bmp, (float)brightness));
+        img.setImageBitmap(changeBitmap(bmp, (float)brightness));
     }
 
     @Override

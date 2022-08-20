@@ -19,8 +19,8 @@ public class ContrastButton extends StickBarStrategyPattern {
         super(activity);
     }
 
-    public Bitmap changeBitmapContrast(Bitmap bmp, float contrast)
-    {
+    @Override
+    public ColorMatrix createColorMatrix(float contrast) {
         ColorMatrix cm = new ColorMatrix(new float[]
                 {
                         contrast, 0, 0, 0, 0,
@@ -29,21 +29,13 @@ public class ContrastButton extends StickBarStrategyPattern {
                         0, 0, 0, 1, 0
                 });
 
-        Bitmap change_Bitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
-
-        Canvas canvas = new Canvas(change_Bitmap);
-
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-        canvas.drawBitmap(bmp, 0, 0, paint);
-
-        return change_Bitmap;
+        return cm;
     }
 
     @Override
     public void buttonOperating(int i) {
         contrast = 0 + 1 * (i/50.0);
-        img.setImageBitmap(changeBitmapContrast(bmp, (float)contrast));
+        img.setImageBitmap(changeBitmap(bmp, (float)contrast));
     }
 
     @Override
