@@ -2,10 +2,12 @@ package com.example.pnurecovery;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,40 +17,48 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.content.Context;
 import android.widget.Toast;
+
+import com.example.pnurecovery.StickBarStrategyPattern.BrightnessButton;
+import com.example.pnurecovery.StickBarStrategyPattern.ContrastButton;
+import com.example.pnurecovery.StickBarStrategyPattern.SaturationButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
+    Activity activity = (Activity)this;
     Context context = (Context)this;
     int degree = 0;
     int edit_on = 0;
     int edit_detail_on = 0;
     int save_count = 0;
+    int stick_bar_on = 0;
 
-    public Uri image_save() {
+    public Uri imageSave() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
 
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat();
         String getTime = sdf.format(date);
 
+        img.destroyDrawingCache();
         img.setDrawingCacheEnabled(true);
         Bitmap bitmap = img.getDrawingCache();
 
         String str = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, getTime + "_" + save_count, "");
 
-        print_image_save_message(getTime + "_" + save_count);
+        printImageSaveMessage(getTime + "_" + save_count);
         save_count = save_count + 1;
         img.destroyDrawingCache();
 
         return Uri.parse(str);
     }
 
-    public void print_image_save_message(String fileName) {
+    public void printImageSaveMessage(String fileName) {
         Toast message = Toast.makeText(context.getApplicationContext(), "picture 폴더에" + fileName + "이 저장되었습니다.", Toast.LENGTH_LONG);
         message.show();
     }
@@ -60,13 +70,13 @@ public class MainActivity extends AppCompatActivity {
             LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             inflater.inflate(R.layout.edit, edit_layer, true);
 
-            set_edit_button();
+            setEditButton();
 
             edit_on = 1;
         }
     }
 
-    public void check_turn_off_edit() {
+    public void checkTurnOffEdit() {
         LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
 
         if (edit_on == 1) {
@@ -76,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void set_edit_button() {
+    public void setEditButton() {
         LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
 
         Button edit_detail_button = (Button) edit_layer.findViewById(R.id.edit_detail_button);
@@ -85,32 +95,34 @@ public class MainActivity extends AppCompatActivity {
         edit_detail_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_on_edit_detail();
+                removeStickBar();
+                checkTurnOnEditDetail();
             }
         });
 
         cut_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_off_edit_detail();
+                removeStickBar();
+                checkTurnOffEditDetail();
             }
         });
     }
 
-    public void check_turn_on_edit_detail() {
+    public void checkTurnOnEditDetail() {
         LinearLayout edit_detail_layer = (LinearLayout) findViewById(R.id.edit_detail_layout);
 
         if (edit_detail_on == 0) {
             LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             inflater.inflate(R.layout.edit_detail, edit_detail_layer, true);
 
-            set_edit_detail_button();
+            setEditDetailButton();
 
             edit_detail_on = 1;
         }
     }
 
-    public void check_turn_off_edit_detail() {
+    public void checkTurnOffEditDetail() {
         LinearLayout edit_detail_layer = (LinearLayout) findViewById(R.id.edit_detail_layout);
 
         if (edit_detail_on == 1) {
@@ -120,8 +132,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void set_edit_detail_button() {
+    public void setEditDetailButton() {
         LinearLayout edit_detail_layer = (LinearLayout) findViewById(R.id.edit_detail_layout);
+        LinearLayout edit_detail_stick_layer = (LinearLayout) findViewById(R.id.edit_detail_stick_layout);
 
         ImageButton brightness_button = (ImageButton) edit_detail_layer.findViewById(R.id.Button_brightness);
         ImageButton contrast_button = (ImageButton) edit_detail_layer.findViewById(R.id.Button_contrast);
@@ -129,26 +142,60 @@ public class MainActivity extends AppCompatActivity {
 
         TextView mode_notification = (TextView) edit_detail_layer.findViewById(R.id.mode_notification);
 
+
         brightness_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mode_notification.setText("밝기");
+                mode_notification.setText("밝기 : 50");
+                removeStickBar();
+                inflateStickBar();
+                SeekBar seek = (SeekBar) edit_detail_stick_layer.findViewById(R.id.seekBar);
+                seek.setOnSeekBarChangeListener(new BrightnessButton(activity));
             }
         });
 
         contrast_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mode_notification.setText("대비");
+                mode_notification.setText("대비 : 50");
+                removeStickBar();
+                inflateStickBar();
+                SeekBar seek = (SeekBar) edit_detail_stick_layer.findViewById(R.id.seekBar);
+                seek.setOnSeekBarChangeListener(new ContrastButton(activity));
             }
         });
 
         saturation_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mode_notification.setText("채도");
+                mode_notification.setText("채도 : 50");
+                removeStickBar();
+                inflateStickBar();
+                SeekBar seek = (SeekBar) edit_detail_stick_layer.findViewById(R.id.seekBar);
+                seek.setOnSeekBarChangeListener(new SaturationButton(activity));
             }
         });
+    }
+
+    public void inflateStickBar() {
+        LinearLayout edit_detail_stick_layer = (LinearLayout) findViewById(R.id.edit_detail_stick_layout);
+
+        if (stick_bar_on == 0) {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(R.layout.edit_detail_stick_bar, edit_detail_stick_layer, true);
+
+            stick_bar_on = 1;
+        }
+    }
+
+    public void removeStickBar() {
+        LinearLayout edit_detail_stick_layer = (LinearLayout) findViewById(R.id.edit_detail_stick_layout);
+
+        if (stick_bar_on == 1) {
+            edit_detail_stick_layer.removeAllViews();
+
+            stick_bar_on = 0;
+        }
     }
 
     @Override
@@ -156,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ImageView img = (ImageView) findViewById(R.id.imageView);
         Button edit_button = (Button) findViewById(R.id.image_edit_button);
         Button turn_button = (Button) findViewById(R.id.image_turn_button);
         Button share_button = (Button) findViewById(R.id.image_share_button);
@@ -167,6 +213,9 @@ public class MainActivity extends AppCompatActivity {
         edit_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                checkTurnOffEdit();
+                checkTurnOffEditDetail();
+                removeStickBar();
                 check_turn_on_edit();
             }
         });
@@ -174,27 +223,34 @@ public class MainActivity extends AppCompatActivity {
         turn_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_off_edit();
-                check_turn_off_edit_detail();
+                ImageView img = (ImageView) findViewById(R.id.imageView);
 
-                degree = degree + 90;
+                checkTurnOffEdit();
+                checkTurnOffEditDetail();
+                removeStickBar();
+
                 Matrix matrix = new Matrix();
 
-                matrix.postRotate(degree);
-                Bitmap bit = BitmapFactory.decodeResource(getResources(), R.drawable.testpicture);
+                degree = 90;
 
-                img.setImageBitmap(Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, true));
+                matrix.postRotate(degree);
+                img.destroyDrawingCache();
+                img.setDrawingCacheEnabled(true);
+                Bitmap bit = img.getDrawingCache();
+
+                img.setImageBitmap(Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, false));
             }
         });
 
         share_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_off_edit();
-                check_turn_off_edit_detail();
+                checkTurnOffEdit();
+                checkTurnOffEditDetail();
+                removeStickBar();
                 Intent share = new Intent(Intent.ACTION_SEND);
 
-                Uri uri = image_save();
+                Uri uri = imageSave();
 
                 share.setType("image/png");
                 share.putExtra(Intent.EXTRA_STREAM, uri);
@@ -205,23 +261,25 @@ public class MainActivity extends AppCompatActivity {
         load_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_off_edit();
-                check_turn_off_edit_detail();
+                checkTurnOffEdit();
+                checkTurnOffEditDetail();
+                removeStickBar();
             }
         });
 
         super_resolution_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                check_turn_off_edit();
-                check_turn_off_edit_detail();
+                checkTurnOffEdit();
+                checkTurnOffEditDetail();
+                removeStickBar();
             }
         });
 
         save_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                image_save();
+                imageSave();
             }
         });
     }

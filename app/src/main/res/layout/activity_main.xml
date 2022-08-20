@@ -76,6 +76,12 @@
         tools:layout_editor_absoluteY="731dp">
 
         <LinearLayout
+            android:id="@+id/edit_detail_stick_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"></LinearLayout>
+
+        <LinearLayout
             android:id="@+id/edit_detail_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
