@@ -1,5 +1,6 @@
 package com.example.pnurecovery;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.pnurecovery.StickBarStrategyPattern.BrightnessButton;
 import com.example.pnurecovery.StickBarStrategyPattern.ContrastButton;
 import com.example.pnurecovery.StickBarStrategyPattern.SaturationButton;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     int edit_detail_on = 0;
     int save_count = 0;
     int stick_bar_on = 0;
+    ImageView imageView;
 
     public Uri imageSave() {
         ImageView img = (ImageView) findViewById(R.id.imageView);
@@ -198,6 +201,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void turnOnSRButton() {
+        LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
+
+        if (edit_on == 0) {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(R.layout.sr_edit, edit_layer, true);
+
+            setSRButton();
+
+            edit_on = 1;
+        }
+    }
+
+    public void setSRButton() {
+        LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
+
+        Button cartoonization_button = (Button) edit_layer.findViewById(R.id.cartoonization_button);
+        Button sr_button = (Button) edit_layer.findViewById(R.id.sr_button);
+
+        cartoonization_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        sr_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+    public void turnOffAllAdditionalButton() {
+        checkTurnOffEdit();
+        checkTurnOffEditDetail();
+        removeStickBar();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -210,12 +253,12 @@ public class MainActivity extends AppCompatActivity {
         Button super_resolution_button = (Button) findViewById(R.id.image_super_resolution_button);
         Button save_button = (Button) findViewById(R.id.image_save_button);
 
+        imageView = findViewById(R.id.imageView);
+
         edit_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkTurnOffEdit();
-                checkTurnOffEditDetail();
-                removeStickBar();
+                turnOffAllAdditionalButton();
                 check_turn_on_edit();
             }
         });
@@ -225,9 +268,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 ImageView img = (ImageView) findViewById(R.id.imageView);
 
-                checkTurnOffEdit();
-                checkTurnOffEditDetail();
-                removeStickBar();
+                turnOffAllAdditionalButton();
 
                 Matrix matrix = new Matrix();
 
@@ -245,9 +286,7 @@ public class MainActivity extends AppCompatActivity {
         share_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkTurnOffEdit();
-                checkTurnOffEditDetail();
-                removeStickBar();
+                turnOffAllAdditionalButton();
                 Intent share = new Intent(Intent.ACTION_SEND);
 
                 Uri uri = imageSave();
@@ -261,18 +300,21 @@ public class MainActivity extends AppCompatActivity {
         load_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkTurnOffEdit();
-                checkTurnOffEditDetail();
-                removeStickBar();
+                turnOffAllAdditionalButton();
+                
+                // 갤러리 접근
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, 0);
             }
         });
 
         super_resolution_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkTurnOffEdit();
-                checkTurnOffEditDetail();
-                removeStickBar();
+                turnOffAllAdditionalButton();
+                turnOnSRButton();
             }
         });
 
@@ -283,4 +325,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    // 이미지 로드
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                Glide.with(getApplicationContext()).load(data.getData()).override(1000, 1000).into(imageView);
+            }
+        }
+    }
+
 }
