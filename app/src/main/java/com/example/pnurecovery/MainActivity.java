@@ -350,13 +350,15 @@ public class MainActivity extends AppCompatActivity {
                 img.setDrawingCacheEnabled(true);
                 bmp = img.getDrawingCache();
 
-                Bitmap bitmap = Bitmap.createScaledBitmap(bmp, 50, 50, true);
-                ByteBuffer input = ByteBuffer.allocateDirect(50 * 50 * 3 * 4).order(ByteOrder.nativeOrder());
-                for (int y = 0; y < 50; y++) {
-                    for (int x = 0; x < 50; x++) {
+                int inputWidth = 50;
+                int inputHeight = 50;
+
+                Bitmap bitmap = Bitmap.createScaledBitmap(bmp, inputWidth, inputHeight, true);
+                ByteBuffer input = ByteBuffer.allocateDirect(inputWidth * inputHeight * 3 * 4).order(ByteOrder.nativeOrder());
+                for (int y = 0; y < inputHeight; y++) {
+                    for (int x = 0; x < inputWidth; x++) {
                         int px = bitmap.getPixel(x, y);
 
-                        // Get channel values from the pixel value.
                         int r = Color.red(px);
                         int g = Color.green(px);
                         int b = Color.blue(px);
@@ -366,19 +368,16 @@ public class MainActivity extends AppCompatActivity {
                         input.putFloat((float)b);
                     }
                 }
-                System.out.println("*****************************************************");
-                System.out.println(input);
-                System.out.println("*****************************************************");
 
-                ByteBuffer modelOutput = ByteBuffer.allocateDirect(200 * 200 * 3 * 4).order(ByteOrder.nativeOrder());
+                int outputWidth = 200;
+                int outputHeight = 200;
+
+                ByteBuffer modelOutput = ByteBuffer.allocateDirect(outputWidth * outputHeight * 3 * 4).order(ByteOrder.nativeOrder());
 
                 Interpreter tflite = getTfliteInterpreter("ESRGAN.tflite");
                 tflite.run(input, modelOutput);
 
                 modelOutput.rewind();
-
-                int outputWidth = 200;
-                int outputHeight = 200;
 
                 Bitmap bitmap2 = Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888);
 
@@ -386,11 +385,31 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < outputWidth * outputHeight; i++) {
                     int a = 0xFF;
 
-                    float r = (modelOutput.getFloat());
-                    float g = (modelOutput.getFloat());
-                    float b = (modelOutput.getFloat());
+                    short r = (short)(modelOutput.getFloat());
+                    short g = (short)(modelOutput.getFloat());
+                    short b = (short)(modelOutput.getFloat());
 
-                    pixels[i] = a << 24 | ((int) r << 16) | ((int) g << 8) | (int) b;
+                    if (r > 250) {
+                        r = 0xFF;
+                    }
+                    if (g > 250) {
+                        g = 0xFF;
+                    }
+                    if (b > 250) {
+                        b = 0xFF;
+                    }
+
+                    if (r < 6) {
+                        r = 0;
+                    }
+                    if (g < 6) {
+                        g = 0;
+                    }
+                    if (b < 6) {
+                        b = 0;
+                    }
+
+                    pixels[i] = a << 24 | r << 16 | g << 8 | b;
                 }
 
                 bitmap2.setPixels(pixels, 0, outputWidth, 0, 0, outputWidth, outputHeight);
