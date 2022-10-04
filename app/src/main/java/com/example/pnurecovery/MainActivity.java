@@ -1,17 +1,13 @@
 package com.example.pnurecovery;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import java.lang.Math;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -29,6 +25,9 @@ import android.content.Context;
 import android.widget.Toast;
 
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.gpu.CompatibilityList;
+import org.tensorflow.lite.gpu.GpuDelegate;
+import org.tensorflow.lite.gpu.GpuDelegateFactory;
 
 import com.bumptech.glide.Glide;
 import com.example.pnurecovery.StickBarStrategyPattern.BrightnessButton;
@@ -111,27 +110,12 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
 
         Button edit_detail_button = (Button) edit_layer.findViewById(R.id.edit_detail_button);
-        Button cut_button = (Button) edit_layer.findViewById(R.id.cut_button);
 
         edit_detail_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 removeStickBar();
                 checkTurnOnEditDetail();
-            }
-        });
-
-        cut_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent,
-                        1);
-
-                removeStickBar();
-                checkTurnOffEditDetail();
             }
         });
     }
@@ -241,20 +225,11 @@ public class MainActivity extends AppCompatActivity {
     public void setSRButton() {
         LinearLayout edit_layer = (LinearLayout) findViewById(R.id.edit_layout);
 
-        Button cartoonization_button = (Button) edit_layer.findViewById(R.id.cartoonization_button);
         Button sr_button = (Button) edit_layer.findViewById(R.id.sr_button);
-
-        cartoonization_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
 
         sr_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
             }
         });
     }
@@ -303,8 +278,9 @@ public class MainActivity extends AppCompatActivity {
                 img.destroyDrawingCache();
                 img.setDrawingCacheEnabled(true);
                 Bitmap bit = img.getDrawingCache();
+                bit = Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, false);
 
-                img.setImageBitmap(Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, false));
+                img.setImageBitmap(bit);
             }
         });
 
@@ -339,12 +315,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 turnOffAllAdditionalButton();
-                turnOnSRButton();
 
                 ImageView img;
                 Bitmap bmp;
 
+                int origin_width;
+                int origin_height;
+
                 img = (ImageView) activity.findViewById(R.id.imageView);
+
+                origin_width = img.getWidth();
+                origin_height = img.getHeight();
 
                 img.destroyDrawingCache();
                 img.setDrawingCacheEnabled(true);
@@ -413,8 +394,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 bitmap2.setPixels(pixels, 0, outputWidth, 0, 0, outputWidth, outputHeight);
+                bitmap2 = Bitmap.createScaledBitmap(bitmap2, origin_width, origin_height, true);
 
                 img.setImageBitmap(bitmap2);
+                Glide.with(getApplicationContext()).load(bitmap2).override(2000, 2000).into(imageView);
             }
         });
 
@@ -445,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, result);
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
-                Glide.with(getApplicationContext()).load(result.getData()).override(1000, 1000).into(imageView);
+                Glide.with(getApplicationContext()).load(result.getData()).override(2000, 2000).into(imageView);
                 Toast.makeText(activity, "이미지로드", Toast.LENGTH_SHORT).show();
             }
         }

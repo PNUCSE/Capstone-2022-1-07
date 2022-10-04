@@ -24,13 +24,6 @@
                 android:text="편집"
                 android:textColor="#FFEB3B" />
 
-            <Button
-                android:id="@+id/cut_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#000000"
-                android:text="자르기"
-                android:textColor="#FFEB3B" />
         </LinearLayout>
     </LinearLayout>
 

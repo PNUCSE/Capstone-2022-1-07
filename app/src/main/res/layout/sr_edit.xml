@@ -17,14 +17,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/cartoonization_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#000000"
-                android:text="카툰화"
-                android:textColor="#FFEB3B" />
-
-            <Button
                 android:id="@+id/sr_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
